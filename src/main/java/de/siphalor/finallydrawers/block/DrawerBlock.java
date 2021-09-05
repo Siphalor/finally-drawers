@@ -20,17 +20,23 @@ import org.jetbrains.annotations.Nullable;
 public class DrawerBlock extends BlockWithEntity {
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 
+	private final String drawerType;
 	private final int width;
 	private final int height;
+	private final Identifier woodBaseId;
 	private final DrawerRank rank;
-	private final int capacity;
 
-	public DrawerBlock(Settings settings, int width, int height, DrawerRank rank, int capacity) {
+	public DrawerBlock(Settings settings, String drawerType, int width, int height, Identifier woodBaseId, DrawerRank rank) {
 		super(settings);
+		this.drawerType = drawerType;
 		this.width = width;
 		this.height = height;
+		this.woodBaseId = woodBaseId;
 		this.rank = rank;
-		this.capacity = capacity;
+	}
+
+	public String getDrawerType() {
+		return drawerType;
 	}
 
 	public int getSlotGridWidth() {
@@ -41,12 +47,16 @@ public class DrawerBlock extends BlockWithEntity {
 		return height;
 	}
 
+	public Identifier getWoodBaseId() {
+		return woodBaseId;
+	}
+
 	public DrawerRank getRank() {
 		return rank;
 	}
 
 	public int getEntryCapacity() {
-		return capacity / (width * height);
+		return rank.getCapacity() / (width * height);
 	}
 
 	@Override
@@ -110,7 +120,7 @@ public class DrawerBlock extends BlockWithEntity {
 
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-		if (!state.isOf(newState.getBlock())) {
+		if (!(newState.getBlock() instanceof DrawerBlock)) {
 			DrawerBlockEntity blockEntity = getBlockEntity(world, pos);
 			ItemScatterer.spawn(world, pos, blockEntity);
 			world.updateComparators(pos, this);

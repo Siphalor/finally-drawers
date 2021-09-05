@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,17 +78,23 @@ public class FDDrawers {
 		gameRegisteredBlockData.remove(drawerData.getBaseId());
 		DRAWER_DATA.put(drawerData.getBaseId(), drawerData);
 
-		createDrawer(drawerData.getBaseId(), drawerData.getWood(), "normal", 1, 1);
-		createDrawer(drawerData.getBaseId(), drawerData.getWood(), "quarter", 2, 2);
+		createDrawer(drawerData, "normal", 1, 1);
+		createDrawer(drawerData, "quarter", 2, 2);
 	}
 
-	public static void createDrawer(Identifier baseId, Block wood, String type, int gridWidth, int gridHeight) {
-		String drawerPath = "drawers/" + type + "/" + baseId.getNamespace() + "/" + baseId.getPath() + "/";
+	public static void createDrawer(DrawerData drawerData, String type, int gridWidth, int gridHeight) {
+		Map<DrawerRank, DrawerBlock> rank2Blocks = drawerData.getBlocks().computeIfAbsent(type, _key -> new HashMap<>());
+
+		String drawerPath = "drawers/" + type + "/"
+				                    + drawerData.getBaseId().getNamespace() + "/" + drawerData.getBaseId().getPath() + "/";
 		for (DrawerRank rank : FDConfig.general.ranks) {
 			Identifier rankId = rank.getBaseId();
-			Block drawerBlock = new DrawerBlock(FabricBlockSettings.copyOf(wood), gridWidth, gridHeight, rank, rank.getCapacity());
+			DrawerBlock drawerBlock = new DrawerBlock(
+					FabricBlockSettings.copyOf(drawerData.getWood()), type, gridWidth, gridHeight, drawerData.getBaseId(), rank
+			);
 			Identifier id = new Identifier(FinallyDrawers.MOD_ID, drawerPath + rankId.getNamespace() + "/" + rankId.getPath());
 			Registry.register(Registry.BLOCK, id, drawerBlock);
+			rank2Blocks.put(rank, drawerBlock);
 			BlockItem drawerItem = Registry.register(
 					Registry.ITEM, id,
 					new BlockItem(drawerBlock, new Item.Settings().group(FinallyDrawers.ITEM_GROUP))
@@ -102,6 +109,7 @@ public class FDDrawers {
 		private Identifier woodId;
 		private Block wood;
 		private Identifier strippedWoodId;
+		private final Map<String, Map<DrawerRank, DrawerBlock>> blocks = new HashMap<>();
 
 		public DrawerData(Identifier baseId) {
 			this.baseId = baseId;
@@ -138,6 +146,10 @@ public class FDDrawers {
 
 		public void setStrippedWoodId(Identifier strippedWoodId) {
 			this.strippedWoodId = strippedWoodId;
+		}
+
+		public Map<String, Map<DrawerRank, DrawerBlock>> getBlocks() {
+			return blocks;
 		}
 	}
 }

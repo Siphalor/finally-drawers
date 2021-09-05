@@ -21,15 +21,15 @@ public class DrawerStorage implements Inventory {
 	/**
 	 * Base capacity measured in stacks per entry
 	 */
-	private final int baseCapacity;
+	private int entryCapacity;
 	private Consumer<Collection<Entry>> changeListener;
 
-	public DrawerStorage(int size, int baseCapacity) {
+	public DrawerStorage(int size, int entryCapacity) {
 		entries = new Entry[size];
 		for (int i = 0; i < entries.length; i++) {
 			entries[i] = new Entry(i);
 		}
-		this.baseCapacity = baseCapacity;
+		this.entryCapacity = entryCapacity;
 	}
 
 	@Nullable
@@ -41,7 +41,11 @@ public class DrawerStorage implements Inventory {
 	}
 
 	public int getEntryCapacity() {
-		return baseCapacity;
+		return entryCapacity;
+	}
+
+	public void setEntryCapacity(int entryCapacity) {
+		this.entryCapacity = entryCapacity;
 	}
 
 	public void setChangeListener(Consumer<Collection<Entry>> changeListener) {
