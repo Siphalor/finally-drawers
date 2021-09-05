@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "finally_drawers:item/upgrade_from",
+		"layer1": "finally_drawers:item/upgrade_to",
+		"layer2": "finally_drawers:item/upgrade_overlay"
+	}
+}

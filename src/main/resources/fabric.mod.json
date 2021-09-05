@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "finally_drawers",
+  "version": "${version}",
+  "name": "Finally drawers",
+  "description": "Another storage-drawer-like mod to end them all :P",
+  "authors": [
+    "Siphalor"
+  ],
+  "contributors": [],
+  "contact": {
+    "homepage": "https://github.com/Siphalor/finally-drawers",
+    "sources": "https://github.com/Siphalor/finally-drawers"
+  },
+  "license": "Apache-2.0",
+  "icon": "assets/finally_drawers/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "de.siphalor.finallydrawers.FinallyDrawers"
+    ],
+    "client": [
+      "de.siphalor.finallydrawers.client.FinallyDrawersClient"
+    ],
+    "server": [],
+    "tweed4:config": [
+      "de.siphalor.finallydrawers.FDConfig"
+    ]
+  },
+  "mixins": [
+    "finally_drawers.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.6",
+    "fabric": "*"
+  }
+}

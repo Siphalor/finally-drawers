@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "de.siphalor.finallydrawers.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+	],
+	"client": [
+		"client.MixinBakedModelManager"
+	],
+	"server": [],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
