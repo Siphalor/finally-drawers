@@ -10,27 +10,25 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Vec3f;
 
-public class DrawerBlockEntityRenderer extends BlockEntityRenderer<DrawerBlockEntity> {
+public class DrawerBlockEntityRenderer implements BlockEntityRenderer<DrawerBlockEntity> {
 
 	private final ItemRenderer itemRenderer;
 	private final TextRenderer textRenderer;
 
-	public DrawerBlockEntityRenderer(BlockEntityRenderDispatcher dispatcher) {
-		super(dispatcher);
+	public DrawerBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
 		itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-		textRenderer = MinecraftClient.getInstance().textRenderer;
+		textRenderer = context.getTextRenderer();
 	}
 
 	@Override
@@ -57,9 +55,7 @@ public class DrawerBlockEntityRenderer extends BlockEntityRenderer<DrawerBlockEn
 		matrices.translate(0D, -Y_PARTIAL * 0.5D, 0D);
 		int k = 0;
 		int color = (int) (light / 15728880F * 0xff);
-		int shadowColor = (int) (color * 0.3F);
 		color = color | color << 8 | color << 16;
-		shadowColor = shadowColor | shadowColor << 8 | shadowColor << 16;
 		for (int i = 0; i < block.getSlotGridHeight(); i++) {
 			matrices.push();
 			matrices.translate(X_PARTIAL * 0.5D, 0D, 0D);
@@ -79,14 +75,13 @@ public class DrawerBlockEntityRenderer extends BlockEntityRenderer<DrawerBlockEn
 				} else {
 					DiffuseLighting.disableGuiDepthLighting();
 				}
-				matrices.peek().getNormal().load(Matrix3f.scale(1, 1, 0.6F));
+				matrices.peek().getNormalMatrix().load(Matrix3f.scale(1, 1, 0.6F));
 				itemRenderer.renderItem(entry.getReference(),
 						ModelTransformation.Mode.GUI, light,
-						OverlayTexture.DEFAULT_UV, matrices, vertexConsumers
+						OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, 0
 				);
 				DiffuseLighting.disableGuiDepthLighting();
 				matrices.pop();
-				DiffuseLighting.disable();
 
 				matrices.translate(0D, 0D, -0.03D);
 				matrices.scale(0.035F, -0.035F, -0.035F);
@@ -103,13 +98,7 @@ public class DrawerBlockEntityRenderer extends BlockEntityRenderer<DrawerBlockEn
 							text = String.valueOf(entry.getAmount());
 						}
 					}
-					textRenderer.draw(
-							matrices, new LiteralText(text), -textRenderer.getWidth(text) / 2F, 20, color
-					);
-					matrices.translate(0D, 0D, 0.001D);
-					textRenderer.draw(
-							matrices, new LiteralText(text), -textRenderer.getWidth(text) / 2F + 1, 21, shadowColor
-					);
+					textRenderer.draw(text, -textRenderer.getWidth(text) / 2F, 21, color, true, matrices.peek().getPositionMatrix(), vertexConsumers, false, 0, light);
 				}
 				matrices.pop();
 				matrices.translate(X_PARTIAL, 0D, 0D);

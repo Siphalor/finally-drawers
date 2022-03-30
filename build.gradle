@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.9-SNAPSHOT'
+	id 'fabric-loom' version '0.11-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -16,6 +16,22 @@ loom {
 repositories {
 	maven {
 		url "https://maven.siphalor.de"
+		content {
+			includeGroupByRegex "de\\.siphalor(\\..+)?"
+		}
+	}
+	maven {
+		url "https://maven.terraformersmc.com/releases"
+		content {
+			includeGroup "com.terraformersmc"
+		}
+	}
+	maven {
+		url "https://maven.shedaniel.me"
+		content {
+			includeGroupByRegex "me\\.shedaniel(\\..*)?"
+			includeGroup "dev.architectury"
+		}
 	}
 	maven { url "https://jitpack.io" }
 }
@@ -28,15 +44,18 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.2.2+"))
-	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.1.1+"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.2.0+"))
-	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.1.0+"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.0.0+"))
-	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.0.0+"))
-	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.10"))
+	include(modApi("de.siphalor.tweed4:tweed4-base-$minecraft_major_version:1.5.0+mc1.18.2"))
+	include(modApi("de.siphalor.tweed4:tweed4-annotated-$minecraft_major_version:1.3.1+mc1.18.2"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-$minecraft_major_version:1.2.1+mc1.18.2"))
+	include(modApi("de.siphalor.tweed4:tweed4-data-hjson-$minecraft_major_version:1.1.0+mc1.18.2"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-screen-$minecraft_major_version:1.1.1+mc1.18.2"))
+	include(modApi("de.siphalor.tweed4:tweed4-tailor-coat-$minecraft_major_version:1.1.3+mc1.18.2"))
+	include(modApi("de.siphalor:coat-$minecraft_major_version:1.0.0-beta.17+mc1.18.2"))
 
-	modRuntime("com.github.astei:lazydfu:master-SNAPSHOT")
+	modRuntimeOnly("com.github.astei:lazydfu:master-SNAPSHOT")
+	modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:8.0.441") {
+		exclude group: "net.fabricmc.fabric-api"
+	}
 }
 
 processResources {
@@ -75,16 +94,8 @@ jar {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(jar) {
-				builtBy remapJar
-			}
-			artifact("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar"){
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			from components.java
+			java.withSourcesJar()
 		}
 	}
 

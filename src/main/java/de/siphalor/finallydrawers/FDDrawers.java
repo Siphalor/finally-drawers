@@ -12,13 +12,13 @@ import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 public class FDDrawers {
 	private static final ConcurrentMap<Identifier, DrawerData> gameRegisteredBlockData = new ConcurrentHashMap<>();
@@ -26,10 +26,11 @@ public class FDDrawers {
 	public static final Set<DrawerUpgradeItem> UPGRADE_ITEMS = new ConcurrentSet<>();
 
 	public static void init() {
-		// A complete copy is required to prevent ConcurrentModificationExceptions
-		//noinspection SimplifyStreamApiCallChains
-		Registry.BLOCK.getEntries().stream().collect(Collectors.toList())
-				.forEach(entry -> FDDrawers.processRegisteredBlock(entry.getKey().getValue(), entry.getValue()));
+		Registry.BLOCK.getIndexedEntries().forEach(entry -> {
+			if (entry.getKey().isPresent()) {
+				processRegisteredBlock(entry.getKey().get().getValue(), entry.value());
+			}
+		});
 		RegistryEntryAddedCallback.event(Registry.BLOCK).register((rawId, id, block) -> FDDrawers.processRegisteredBlock(id, block));
 	}
 
@@ -77,6 +78,8 @@ public class FDDrawers {
 	public static void create(DrawerData drawerData) {
 		gameRegisteredBlockData.remove(drawerData.getBaseId());
 		DRAWER_DATA.put(drawerData.getBaseId(), drawerData);
+
+		FinallyDrawers.log(Level.INFO, "Registered drawer: " + drawerData.getBaseId());
 
 		createDrawer(drawerData, "normal", 1, 1);
 		createDrawer(drawerData, "quarter", 2, 2);

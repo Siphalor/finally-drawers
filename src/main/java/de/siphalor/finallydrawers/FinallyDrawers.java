@@ -2,11 +2,13 @@ package de.siphalor.finallydrawers;
 
 import de.siphalor.finallydrawers.block.DrawerBlock;
 import de.siphalor.finallydrawers.block.DrawerBlockEntity;
+import de.siphalor.finallydrawers.mixin.BlockEntityTypeAccessor;
 import de.siphalor.finallydrawers.storage.DrawerRank;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -47,11 +49,11 @@ public class FinallyDrawers implements ModInitializer {
 
 		// BLOCKS AND ITEMS AND THINGS
 		DRAWER_BLOCK_ENTITY_TYPE = register(
-				new BlockEntityType<>(DrawerBlockEntity::new, DRAWER_BLOCKS, null),
+				FabricBlockEntityTypeBuilder.create(DrawerBlockEntity::new, DRAWER_BLOCKS.toArray(new Block[0])).build(),
 				"drawer"
 		);
-		////noinspection ConstantConditions
-		//((BlockEntityTypeAccessor) DRAWER_BLOCK_ENTITY_TYPE).setBlocks(new HashSet<>(((BlockEntityTypeAccessor) DRAWER_BLOCK_ENTITY_TYPE).getBlocks())); // makes the BE block list editable
+		((BlockEntityTypeAccessor) DRAWER_BLOCK_ENTITY_TYPE).setBlocks(DRAWER_BLOCKS);
+
 		// EVENTS
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 

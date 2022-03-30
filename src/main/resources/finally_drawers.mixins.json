@@ -3,6 +3,8 @@
 	"package": "de.siphalor.finallydrawers.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
+		"BlockEntityTypeAccessor",
+		"MixinRecipeManager"
 	],
 	"client": [
 		"client.MixinBakedModelManager"

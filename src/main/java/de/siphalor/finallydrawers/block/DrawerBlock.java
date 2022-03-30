@@ -78,8 +78,8 @@ public class DrawerBlock extends BlockWithEntity {
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new DrawerBlockEntity(width, height, getEntryCapacity());
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new DrawerBlockEntity(pos, state, width, height, getEntryCapacity());
 	}
 
 	public static DrawerBlockEntity getBlockEntity(World world, BlockPos pos) {

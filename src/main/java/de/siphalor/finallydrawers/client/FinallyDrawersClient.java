@@ -19,7 +19,7 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
@@ -52,7 +52,7 @@ public class FinallyDrawersClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		BlockEntityRendererRegistry.INSTANCE.register(FinallyDrawers.DRAWER_BLOCK_ENTITY_TYPE, DrawerBlockEntityRenderer::new);
+		BlockEntityRendererRegistry.register(FinallyDrawers.DRAWER_BLOCK_ENTITY_TYPE, DrawerBlockEntityRenderer::new);
 
 		// NETWORKING
 		ClientPlayNetworking.registerGlobalReceiver(FinallyDrawers.DRAWER_UPDATE_PACKET_S2C_ID, (client, handler, buf, responseSender) -> {
@@ -79,6 +79,8 @@ public class FinallyDrawersClient implements ClientModInitializer {
 		// MODEL GENERATION
 		ModelLoadingRegistry.INSTANCE.registerVariantProvider(FinallyDrawersClient::mapModelVariant);
 		ModelLoadingRegistry.INSTANCE.registerResourceProvider(FinallyDrawersClient::mapModelResource);
+
+
 
 	}
 

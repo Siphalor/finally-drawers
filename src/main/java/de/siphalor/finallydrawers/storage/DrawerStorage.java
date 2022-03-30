@@ -142,7 +142,7 @@ public class DrawerStorage implements Inventory {
 	public void setStack(int slot, ItemStack stack) {
 		int entry = slot / getEntryCapacity();
 
-		if (!ScreenHandler.canStacksCombine(stack, entries[entry].getReference())) {
+		if (!ItemStack.canCombine(stack, entries[entry].getReference())) {
 			return;
 		}
 
@@ -279,7 +279,7 @@ public class DrawerStorage implements Inventory {
 				return true;
 			}
 
-			if (!ScreenHandler.canStacksCombine(stack, reference)) {
+			if (!ItemStack.canCombine(stack, reference)) {
 				return false;
 			}
 
@@ -293,7 +293,7 @@ public class DrawerStorage implements Inventory {
 		public boolean canInsertSingle(ItemStack stack) {
 			if (stack.isEmpty()) return false;
 			if (reference.isEmpty()) return true;
-			return amount < getItemCapacity() && ScreenHandler.canStacksCombine(stack, reference);
+			return amount < getItemCapacity() && ItemStack.canCombine(stack, reference);
 		}
 
 		public boolean insertSingle(ItemStack stack) {
@@ -306,7 +306,7 @@ public class DrawerStorage implements Inventory {
 				return true;
 			}
 			if (amount < getItemCapacity()) {
-				if (!ScreenHandler.canStacksCombine(stack, reference)) {
+				if (!ItemStack.canCombine(stack, reference)) {
 					return false;
 				}
 				setAmount(amount + 1);

@@ -4,7 +4,6 @@ import de.siphalor.finallydrawers.FinallyDrawers;
 import de.siphalor.finallydrawers.storage.DrawerStorage;
 import de.siphalor.finallydrawers.util.ClientProxy;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -15,7 +14,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -30,40 +32,34 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DrawerBlockEntity extends LockableContainerBlockEntity implements BlockEntityClientSerializable {
+public class DrawerBlockEntity extends LockableContainerBlockEntity {
 	@NotNull
 	private DrawerStorage storage;
 	private long lastTrigger;
 	private int gridWidth;
 	private int gridHeight;
 
-	public DrawerBlockEntity() {
-		this(1, 1, 32);
+	public DrawerBlockEntity(BlockPos blockPos, BlockState blockState) {
+		this(blockPos, blockState, 1, 1, 32);
 	}
 
-	public DrawerBlockEntity(int width, int height, int entryCapacity) {
-		super(FinallyDrawers.DRAWER_BLOCK_ENTITY_TYPE);
+	public DrawerBlockEntity(BlockPos blockPos, BlockState blockState, int width, int height, int entryCapacity) {
+		super(FinallyDrawers.DRAWER_BLOCK_ENTITY_TYPE, blockPos, blockState);
 		gridWidth = width;
 		gridHeight = height;
 		this.storage = new DrawerStorage(width * height, entryCapacity);
 	}
 
 	@Override
-	public void setLocation(World world, BlockPos pos) {
-		super.setLocation(world, pos);
+	public void setWorld(World world) {
+		super.setWorld(world);
 		if (!world.isClient) {
 			storage.setChangeListener(entries -> {
-				PacketByteBuf buf = PacketByteBufs.create();
-				buf.writeIdentifier(world.getRegistryKey().getValue());
-				buf.writeBlockPos(pos);
-				buf.writeByte(entries.size());
-				for (DrawerStorage.Entry entry : entries) {
-					buf.writeByte(entry.getPos());
-					entry.write(buf);
-				}
+				markDirty();
 
+				BlockEntityUpdateS2CPacket packet = BlockEntityUpdateS2CPacket.create(this);
 				for (ServerPlayerEntity player : PlayerLookup.tracking(this)) {
-					ServerPlayNetworking.send(player, FinallyDrawers.DRAWER_UPDATE_PACKET_S2C_ID, buf);
+					player.networkHandler.sendPacket(packet);
 				}
 			});
 		}
@@ -159,7 +155,6 @@ public class DrawerBlockEntity extends LockableContainerBlockEntity implements B
 					world, pos.getX() + itemPos.x, pos.getY() + itemPos.y, pos.getZ() + itemPos.z, dropStack
 			);
 			itemEntity.setVelocity(itemPos.subtract(0.5D, 0.5D, 0.5D).normalize().multiply(0.2D));
-			//noinspection ConstantConditions
 			world.spawnEntity(itemEntity);
 		}
 	}
@@ -215,33 +210,31 @@ public class DrawerBlockEntity extends LockableContainerBlockEntity implements B
 	}
 
 	@Override
-	public void fromClientTag(NbtCompound tag) {
-		storage.fromTag(tag.getCompound("storage"));
-	}
-
-	@Override
-	public NbtCompound toClientTag(NbtCompound tag) {
-		tag.put("storage", storage.toTag(new NbtCompound()));
-		return tag;
-	}
-
-	@Override
-	public void fromTag(BlockState state, NbtCompound tag) {
-		super.fromTag(state, tag);
-		if (state.getBlock() instanceof DrawerBlock) {
-			DrawerBlock drawerBlock = (DrawerBlock) state.getBlock();
-			gridWidth = drawerBlock.getSlotGridWidth();
-			gridHeight = drawerBlock.getSlotGridHeight();
-			storage = new DrawerStorage(gridHeight * gridWidth, drawerBlock.getEntryCapacity());
-		}
+	public void readNbt(NbtCompound tag) {
+		super.readNbt(tag);
+		DrawerBlock drawerBlock = (DrawerBlock) getCachedState().getBlock();
+		gridWidth = drawerBlock.getSlotGridWidth();
+		gridHeight = drawerBlock.getSlotGridHeight();
+		storage = new DrawerStorage(gridHeight * gridWidth, drawerBlock.getEntryCapacity());
 		if (tag.contains("storage", 10)) {
 			storage.fromTag(tag.getCompound("storage"));
 		}
 	}
 
 	@Override
-	public NbtCompound writeNbt(NbtCompound nbt) {
+	public void writeNbt(NbtCompound nbt) {
 		nbt.put("storage", storage.toTag(new NbtCompound()));
-		return super.writeNbt(nbt);
+		super.writeNbt(nbt);
+	}
+
+	@Nullable
+	@Override
+	public Packet<ClientPlayPacketListener> toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
+
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return createNbt();
 	}
 }
