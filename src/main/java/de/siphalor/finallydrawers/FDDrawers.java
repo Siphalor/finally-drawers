@@ -3,7 +3,6 @@ package de.siphalor.finallydrawers;
 import de.siphalor.finallydrawers.block.DrawerBlock;
 import de.siphalor.finallydrawers.item.DrawerUpgradeItem;
 import de.siphalor.finallydrawers.storage.DrawerRank;
-import io.netty.util.internal.ConcurrentSet;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
@@ -23,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
 public class FDDrawers {
 	private static final ConcurrentMap<Identifier, DrawerData> gameRegisteredBlockData = new ConcurrentHashMap<>();
 	public static final Map<Identifier, DrawerData> DRAWER_DATA = new ConcurrentHashMap<>();
-	public static final Set<DrawerUpgradeItem> UPGRADE_ITEMS = new ConcurrentSet<>();
+	public static final Set<DrawerUpgradeItem> UPGRADE_ITEMS = ConcurrentHashMap.newKeySet();
 
 	public static void init() {
 		Registry.BLOCK.getIndexedEntries().forEach(entry -> {
